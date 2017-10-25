@@ -1,5 +1,5 @@
-# TODO: use a logger instead of IO.puts
 defmodule ExSlack.Bot do
+  require Logger
   use GenServer
 
   # Client API
@@ -65,7 +65,7 @@ defmodule ExSlack.Bot do
         result = case from do
         :from_user -> state.handler.handle_message_from_user(msg, Map.get(new_users, msg.user), state.process_state)
         :from_channel ->
-            IO.puts "Bod id: #{state.bot_id}, contains: #{String.contains?(msg.text, "<@#{state.bot_id}>")}"
+            Logger.info(fn -> "Bod id: #{state.bot_id}, contains: #{String.contains?(msg.text, "<@#{state.bot_id}>")}" end)
             if String.contains?(msg.text, "<@#{state.bot_id}>") do
             state.handler.handle_direct_message_from_channel(msg,
                 Map.get(new_channels, msg.channel), Map.get(new_users, msg.user), state.process_state)
@@ -74,27 +74,27 @@ defmodule ExSlack.Bot do
                 Map.get(new_channels, msg.channel), Map.get(new_users, msg.user), state.process_state)
             end
         _ ->
-            IO.puts "Not handling message [#{msg.text}]"
+            Logger.info("Not handling message [#{msg.text}]"
             {:ok, state.process_state}
         end
 
         new_process_state = result |> process_result_from_handler(msg.channel, state)
       {:ok, %{type: "message", bot_id: _}}  ->
         {new_channels, new_users, new_process_state} = same_state(state)
-        IO.puts "Message from bot received"
+        Logger.info "Message from bot received"
       :reconnect ->
         {new_channels, new_users, new_process_state} = same_state(state)
         Process.send(self(), :socket_reconnect, [])
       _ ->
         {new_channels, new_users, new_process_state} = same_state(state)
-        IO.puts "Other message received"
+        Logger.info "Other message received"
     end
     Process.send_after(self(), :check_slack_events, 1_000)
     {:noreply, %{state | channels: new_channels, users: new_users, process_state: new_process_state}}
   end
 
   def handle_info(:socket_reconnect, state) do
-    IO.puts "Socket reconnect..."
+    Logger.info "Socket reconnect..."
     {:ok, socket} = start_socket(state.token)
     {:noreply, %{state | socket: socket}}
   end
@@ -176,10 +176,10 @@ defmodule ExSlack.Bot do
   defp check_new_slack_events(socket) do
     case socket |> Socket.Web.recv! do
     {:text, msg} ->
-      IO.puts "Slack Event: message"
+      Logger.info "Slack Event: message"
       Poison.Parser.parse(msg, keys: :atoms)
     {:ping, _} ->
-      IO.puts "Slack Event: ping"
+      Logger.info "Slack Event: ping"
       {:ok, :ping}
     {:close, :abnormal, msg} ->
       IO.inspect msg, label: "Slack Event: "
