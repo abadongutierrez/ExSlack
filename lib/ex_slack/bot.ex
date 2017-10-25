@@ -74,7 +74,7 @@ defmodule ExSlack.Bot do
                 Map.get(new_channels, msg.channel), Map.get(new_users, msg.user), state.process_state)
             end
         _ ->
-            Logger.info("Not handling message [#{msg.text}]"
+            Logger.info "Not handling message [#{msg.text}]"
             {:ok, state.process_state}
         end
 
