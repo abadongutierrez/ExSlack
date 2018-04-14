@@ -1,5 +1,5 @@
-defmodule ExSlack.Methods.Groups do
-use ExSlack.Methods.Common
+defmodule ExSlack.WebApi.Groups do
+use ExSlack.WebApi.Common
 
 @method_list "groups.list"
 @method_info "groups.info"

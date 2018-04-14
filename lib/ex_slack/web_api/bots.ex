@@ -1,5 +1,5 @@
-defmodule ExSlack.Methods.Bots do
-  use ExSlack.Methods.Common
+defmodule ExSlack.WebApi.Bots do
+  use ExSlack.WebApi.Common
 
   @method_info "bots.info"
 

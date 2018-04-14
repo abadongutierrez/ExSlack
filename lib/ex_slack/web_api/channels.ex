@@ -1,5 +1,5 @@
-defmodule ExSlack.Methods.Channels do
-  use ExSlack.Methods.Common
+defmodule ExSlack.WebApi.Channels do
+  use ExSlack.WebApi.Common
 
   @method_list "channels.list"
   @method_info "channels.info"

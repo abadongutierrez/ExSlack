@@ -121,19 +121,19 @@ defmodule ExSlack.Bot do
         new_state
       {:reply, text, new_state} ->
         if channel_id do
-          ExSlack.Methods.Chat.post_message(state.token, channel_id, text)
+          ExSlack.WebApi.Chat.post_message(state.token, channel_id, text)
         end
         new_state
       {:reply_user, {user_slack_id, text}, new_state} ->
-        {:ok, new_channel} = ExSlack.Methods.Im.open(state.token, user_slack_id)
-        ExSlack.Methods.Chat.post_message(state.token, new_channel.id, text)
+        {:ok, new_channel} = ExSlack.WebApi.Im.open(state.token, user_slack_id)
+        ExSlack.WebApi.Chat.post_message(state.token, new_channel.id, text)
         new_state
       {:reply_channel, {channel_slack_id, text}, new_state} ->
-        ExSlack.Methods.Chat.post_message(state.token, channel_slack_id, text)
+        ExSlack.WebApi.Chat.post_message(state.token, channel_slack_id, text)
         new_state
       {:replynsend, {text, message}, new_state} ->
         if channel_id do
-          ExSlack.Methods.Chat.post_message(state.token, channel_id, text)
+          ExSlack.WebApi.Chat.post_message(state.token, channel_id, text)
         end
         Process.send(self(), message, [])
         new_state
@@ -149,7 +149,7 @@ defmodule ExSlack.Bot do
     if Map.has_key?(channels, channel_id) do
       channels
     else
-      merge_new_channel(channels, ExSlack.Methods.Channels.info(token, channel_id))
+      merge_new_channel(channels, ExSlack.WebApi.Channels.info(token, channel_id))
     end
   end
 
@@ -163,7 +163,7 @@ defmodule ExSlack.Bot do
     if Map.has_key?(users, user_id) do
       users
     else
-      merge_new_user(users, ExSlack.Methods.Users.info(token, user_id))
+      merge_new_user(users, ExSlack.WebApi.Users.info(token, user_id))
     end
   end
 

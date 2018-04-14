@@ -1,7 +1,17 @@
-defmodule ExSlack.Methods.Common do
+defmodule ExSlack.WebApi.Common do
     
   defmacro __using__(_) do
     quote do
+      defp handle_response({:ok, %HTTPoison.Response{body: body}}, name) do
+        case Poison.Parser.parse(body, keys: :atoms) do
+          {:ok, %{ok: true} = result} ->
+            {:ok, result}
+          {:ok, %{ok: false, error: reason}} -> {:error, reason}
+          {:error, _} -> {:error, "Error parsing body"}
+          _ -> {:error, "Unknown #{name} response"}
+        end
+      end
+
       defp handle_response({:ok, %HTTPoison.Response{body: body}}, type_atoms, name) when is_list(type_atoms) do
         case Poison.Parser.parse(body, keys: :atoms) do
           {:ok, %{ok: true} = result} ->

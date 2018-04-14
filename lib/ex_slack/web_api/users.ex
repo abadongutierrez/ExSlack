@@ -1,5 +1,5 @@
-defmodule ExSlack.Methods.Users do
-  use ExSlack.Methods.Common
+defmodule ExSlack.WebApi.Users do
+  use ExSlack.WebApi.Common
 
   @method_info "users.info"
   @method_list "users.list"
