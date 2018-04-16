@@ -18,3 +18,7 @@ A lot of things!
 Contributions are going to be very welcome! be patient. You can contact me at `abadon.gutierrez@gmail.com` 
 
 [under_construction]: http://marcellusdrilling.com/wp-content/uploads/2016/10/under-construction.png "Under Construccion"
+
+## Example App
+
+There is an example app of how to use this client here: [https://github.com/abadongutierrez/ExSlackExample]
