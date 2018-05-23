@@ -2,7 +2,7 @@
 
 A Slack Real Time Message API and Web API client for Elixir
 
-## Who this works (so far):
+## How this works (so far):
 
 ### Using Slack Events API
 
