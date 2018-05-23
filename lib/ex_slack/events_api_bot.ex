@@ -12,18 +12,13 @@ defmodule ExSlack.EventsApiBot do
   @doc """
   Starts the GenServer Bot.
 
-  * `verification_token`.
-  * `team_id`. Slack Team ID where the Bot is installed.
-  * `bot_user_id`. Slack Bot ID.
-  * `bot_access_token`. Slack Bot Access Token.
+  * `verification_token`. Verification Token specified in the Slack App. It is used to verify events come from the correct Slack App.
   * `handler`. Name of the module that will handle Bot messages.
   """
-  def start_link(verification_token, team_id, bot_user_id, bot_access_token, handler) do
+  def start_link(verification_token, handler) do
+    # TODO remove app specific info like: access_token, bot_id and team_id
     GenServer.start_link(__MODULE__, %{
       verification_token: verification_token,
-      access_token: bot_access_token,
-      bot_id: bot_user_id,
-      team_id: team_id,
       handler: handler,
       bot_state: %{},
       users_state: %{}
@@ -73,17 +68,12 @@ defmodule ExSlack.EventsApiBot do
     team_id = if contains_key_and_value?(dispatched_event, "team_id"), do: dispatched_event["team_id"], else: nil
     user_id = if contains_key_and_value?(event, "user"), do: event["user"], else: nil
     prev_user_state = get_user_state_or_empty(dispatched_event, state)
-    bot_state = build_bot_state(state)
-
-    IO.inspect prev_user_state, label: "prev_user_state 1"
+    bot_state = build_bot_state(team_id)
 
     # TODO is it possible to update bot state and user state at the same time?
     {new_bot_state, new_users_state} = case state.handler.handle_event(event, prev_user_state, bot_state) do
       {:user_state, new_user_state} ->
         Logger.info "Setting user_state for user_id [#{user_id}] from team_id [#{team_id}]"
-        updated_users_state = update_user_state(state.users_state, build_user_state_key(team_id, user_id), prev_user_state, new_user_state)
-        IO.inspect prev_user_state, label: "prev_user_state 2"
-        IO.inspect updated_users_state, label: "updated_users_state"
         {
           bot_state_or_empty(state),
           update_user_state(state.users_state, build_user_state_key(team_id, user_id), prev_user_state, new_user_state)
@@ -94,13 +84,11 @@ defmodule ExSlack.EventsApiBot do
           users_state_or_empty(state)
         }
     end
-    IO.inspect new_bot_state, label: "New bot state:"
-    IO.inspect new_users_state, label: "New user state:"
     {:noreply, %{state | bot_state: new_bot_state, users_state: new_users_state}}
   end
 
   def handle_cast({:interactive_message, event}, state) do
-    result = state.handler.handle_interactive_message(event, build_bot_state(state))
+    result = state.handler.handle_interactive_message(event, build_bot_state(event["team"]["id"]))
     bot_state = case result do
       _ -> if Map.has_key?(state, :bot_state), do: state.bot_state, else: %{}
     end
@@ -140,11 +128,7 @@ defmodule ExSlack.EventsApiBot do
     if Map.has_key?(state, :users_state), do: state.users_state, else: %{}
   end
 
-  defp build_bot_state(state) do
-    %{token: state.access_token, bot_id: state.bot_id, team_id: state.team_id}
-  end
-
-  defp is_map_empty(map) do
-    Enum.count(Map.keys(map)) == 0
+  defp build_bot_state(team_id) do
+    %{team_id: team_id}
   end
 end
