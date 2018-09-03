@@ -7,7 +7,7 @@ defmodule ExSlack.WebApi.Conversations do
   https://api.slack.com/methods/conversations.open
   """
   def open(token, optionals \\ []) when is_list(optionals) do
-    query = %{}
+    query =
       cast(optionals, [:channel, :return_im, :users])
       |> Map.put(:token, token)
     "https://slack.com/api/#{@method_open}"
