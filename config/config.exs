@@ -20,6 +20,9 @@ use Mix.Config
 #
 #     config :logger, level: :info
 #
+config :logger,
+  backends: [:console], # default, support for additional log sinks
+  compile_time_purge_level: :info # purges logs with lower level than this
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment
